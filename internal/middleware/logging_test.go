@@ -9,10 +9,20 @@ import (
 	"testing"
 )
 
+// captureLog redirects the middleware's output into a buffer and restores it
+// after the test. It uses the middleware's own SetOutput so that the writer the
+// Logging handler actually writes to is the one being asserted on — not the
+// global standard logger, which the middleware does not use.
+func captureLog(t *testing.T) *bytes.Buffer {
+	t.Helper()
+	buf := &bytes.Buffer{}
+	SetOutput(buf)
+	t.Cleanup(func() { SetOutput(os.Stdout) })
+	return buf
+}
+
 func TestLoggingLogsMethodStatusAndPath(t *testing.T) {
-	var buf bytes.Buffer
-	SetOutput(&buf)
-	defer SetOutput(os.Stdout)
+	buf := captureLog(t)
 
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -36,9 +46,7 @@ func TestLoggingLogsMethodStatusAndPath(t *testing.T) {
 }
 
 func TestLoggingLogs500(t *testing.T) {
-	var buf bytes.Buffer
-	SetOutput(&buf)
-	defer SetOutput(os.Stdout)
+	buf := captureLog(t)
 
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -56,9 +64,7 @@ func TestLoggingLogs500(t *testing.T) {
 }
 
 func TestLoggingStripsUserQueryAndControlChars(t *testing.T) {
-	var buf bytes.Buffer
-	SetOutput(&buf)
-	defer SetOutput(os.Stdout)
+	buf := captureLog(t)
 
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

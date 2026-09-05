@@ -11,8 +11,8 @@ import (
 
 func TestLoggingLogsMethodStatusAndPath(t *testing.T) {
 	var buf bytes.Buffer
-	logger.SetOutput(&buf)
-	defer logger.SetOutput(os.Stdout)
+	SetOutput(&buf)
+	defer SetOutput(os.Stdout)
 
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -37,8 +37,8 @@ func TestLoggingLogsMethodStatusAndPath(t *testing.T) {
 
 func TestLoggingLogs500(t *testing.T) {
 	var buf bytes.Buffer
-	logger.SetOutput(&buf)
-	defer logger.SetOutput(os.Stdout)
+	SetOutput(&buf)
+	defer SetOutput(os.Stdout)
 
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -57,8 +57,8 @@ func TestLoggingLogs500(t *testing.T) {
 
 func TestLoggingStripsUserQueryAndControlChars(t *testing.T) {
 	var buf bytes.Buffer
-	logger.SetOutput(&buf)
-	defer logger.SetOutput(os.Stdout)
+	SetOutput(&buf)
+	defer SetOutput(os.Stdout)
 
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

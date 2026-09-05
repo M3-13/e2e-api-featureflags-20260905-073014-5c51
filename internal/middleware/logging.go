@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -8,7 +9,11 @@ import (
 	"time"
 )
 
-var logger = log.New(os.Stdout, "", log.LstdFlags)
+var output io.Writer = os.Stdout
+
+func SetOutput(w io.Writer) {
+	output = w
+}
 
 type statusRecorder struct {
 	http.ResponseWriter
@@ -29,6 +34,7 @@ func (r *statusRecorder) Write(b []byte) (int, error) {
 
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := log.New(output, "", log.LstdFlags)
 		start := time.Now()
 		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(rec, r)
